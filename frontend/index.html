@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🌱 Plant Disease Detection</h1>
+
+        <p class="subtitle">
+            Upload a plant leaf image and let AI detect its disease.
+        </p>
+
+        <div class="upload-box">
+
+            <h2>Upload Leaf Image</h2>
+
+            <input type="file" id="imageInput" accept="image/*">
+
+            <img id="preview" alt="Leaf Preview">
+
+            <button id="predictButton">
+                🔍 Detect Disease
+            </button>
+
+            <div id="result">
+                <h3>Prediction Result</h3>
+                <p id="disease">Upload an image to begin.</p>
+                <p id="confidence"></p>
+                <div class="confidence-bar">
+    <div id="confidenceFill"></div>
+</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const imageInput = document.getElementById("imageInput");
+        const preview = document.getElementById("preview");
+        const predictButton = document.getElementById("predictButton");
+        const disease = document.getElementById("disease");
+        const confidence = document.getElementById("confidence");
+
+        imageInput.addEventListener("change", () => {
+            const file = imageInput.files[0];
+
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = "block";
+
+                disease.innerText = "Image selected. Click Detect Disease.";
+                confidence.innerText = "";
+            }
+        });
+
+        predictButton.addEventListener("click", async () => {
+
+            const file = imageInput.files[0];
+
+            if (!file) {
+                alert("Please select a leaf image first.");
+                return;
+            }
+
+            disease.innerText = "Detecting...";
+            confidence.innerText = "";
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(
+                    "http://127.0.0.1:8001/predict",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                const data = await response.json();
+
+                disease.innerText =
+    "🌿 Disease: " + data.disease.replaceAll("_", " ");
+
+confidence.innerText =
+    "🎯 Confidence: " + data.confidence + "%";
+            } catch (error) {
+                disease.innerText = "Error connecting to the server.";
+            }
+        });
+    </script>
+
+</body>
+    
+</html>
